@@ -15,7 +15,7 @@ export interface FontPickerOrCustomProps {
   onToggleCustom?: (useCustom: boolean) => void
 }
 
-export function FontPickerOrCustom(props: FontPickerOrCustomProps) {
+export function FontPickerOrCustom(props: Readonly<FontPickerOrCustomProps>) {
   const {
     id,
     defaultValue,
@@ -63,10 +63,7 @@ export function FontPickerOrCustom(props: FontPickerOrCustomProps) {
             Custom?
           </label>
         </span>
-        <label
-          className="hidden"
-          htmlFor={customInputId}
-        >
+        <label className="hidden" htmlFor={customInputId}>
           <Input
             disabled={!useCustom}
             id={customInputId}

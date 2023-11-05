@@ -3,7 +3,7 @@ import cx from 'classnames'
 export function Range(
   props: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 ) {
-  const { min = 0, max = 100, step = 1, className, type, ...rest } = props
+  const { min = 0, max = 100, step = 1, className, ...rest } = props
 
   return (
     <input

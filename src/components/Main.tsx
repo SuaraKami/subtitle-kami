@@ -6,32 +6,43 @@ import { Label } from './Label'
 import { Range } from './Range'
 import { CopyLinkButton } from './CopyLinkButton'
 import { ColorInput } from './ColorInput'
-import { LanguageSelect, SingleValue, Option, ActionMeta, translateLanguages } from './LanguageSelect'
+import {
+  LanguageSelect,
+  SingleValue,
+  Option,
+  ActionMeta,
+  translateLanguages,
+} from './LanguageSelect'
+import { LanguageKeys } from '../lib/types'
 import { FontPickerOrCustom } from './FontPickerOrCustom'
 
 export function Main() {
   const config = getAllConfig()
   const [hideConfig, setHideConfig] = useState<boolean>(config.hideConfig ?? false)
-  const [apiKey, setApiKey] = useState(config.apiKey || defaults.apiKey)
+  const [apiKey, setApiKey] = useState(config.apiKey ?? defaults.apiKey)
   const minPhraseSepTime = 0
   const [phraseSepTime, setPhraseSepTime] = useState<number>(
-    config.phraseSepTime || defaults.phraseSepTime
+    config.phraseSepTime ?? defaults.phraseSepTime
   )
-  const [recogLang, setRecogLang] = useState<string>(config.recogLang || defaults.recogLang)
-  const [transLang, setTransLang] = useState<string>(config.transLang || defaults.transLang)
-  const [recogFont, setRecogFont] = useState<string>(config.recogFont || defaults.recogFont)
+  const [recogLang, setRecogLang] = useState<LanguageKeys>(
+    config.recogLang ?? (defaults.recogLang as LanguageKeys)
+  )
+  const [transLang, setTransLang] = useState<LanguageKeys>(
+    config.transLang ?? (defaults.transLang as LanguageKeys)
+  )
+  const [recogFont, setRecogFont] = useState<string>(config.recogFont ?? defaults.recogFont)
   const [customRecogFont, setCustomRecogFont] = useState<string>(
-    config.customRecogFont || defaults.customRecogFont
+    config.customRecogFont ?? defaults.customRecogFont
   )
   const [useCustomRecogFont, setUseCustomRecogFont] = useState<boolean>(
-    config.useCustomRecogFont || defaults.useCustomRecogFont
+    config.useCustomRecogFont ?? defaults.useCustomRecogFont
   )
   const [useCustomTransFont, setUseCustomTransFont] = useState<boolean>(
-    config.useCustomTransFont || defaults.useCustomTransFont
+    config.useCustomTransFont ?? defaults.useCustomTransFont
   )
-  const [transFont, setTransFont] = useState<string>(config.transFont || defaults.transFont)
+  const [transFont, setTransFont] = useState<string>(config.transFont ?? defaults.transFont)
   const [customTransFont, setCustomTransFont] = useState<string>(
-    config.customTransFont || defaults.customTransFont
+    config.customTransFont ?? defaults.customTransFont
   )
   const [recogFontSize, setRecogFontSize] = useState<number>(
     config.recogFontSize ?? defaults.recogFontSize
@@ -52,18 +63,18 @@ export function Main() {
     config.transFontStrokeWidth ?? defaults.transFontStrokeWidth
   )
   const [recogFontColor, setRecogFontColor] = useState<string>(
-    config.recogFontColor || defaults.recogFontColor
+    config.recogFontColor ?? defaults.recogFontColor
   )
   const [transFontColor, setTransFontColor] = useState<string>(
-    config.transFontColor || defaults.transFontColor
+    config.transFontColor ?? defaults.transFontColor
   )
   const [recogFontStrokeColor, setRecogFontStrokeColor] = useState<string>(
-    config.recogFontStrokeColor || defaults.recogFontStrokeColor
+    config.recogFontStrokeColor ?? defaults.recogFontStrokeColor
   )
   const [transFontStrokeColor, setTransFontStrokeColor] = useState<string>(
-    config.transFontStrokeColor || defaults.transFontStrokeColor
+    config.transFontStrokeColor ?? defaults.transFontStrokeColor
   )
-  const [bgColor, setBgColor] = useState<string>(config.bgColor || defaults.bgColor)
+  const [bgColor, setBgColor] = useState<string>(config.bgColor ?? defaults.bgColor)
   const [showFontTest, setShowFontTest] = useState<boolean>(
     config.showFontTest ?? defaults.showFontTest
   )
@@ -80,7 +91,7 @@ export function Main() {
 
   const onChangePhraseSepTime = (e: any) => {
     const newValue = e?.target?.value
-    let newNum = Number(newValue) || phraseSepTime
+    let newNum = Number(newValue) ?? phraseSepTime
     if (newNum < minPhraseSepTime) {
       newNum = minPhraseSepTime
     }
@@ -89,13 +100,13 @@ export function Main() {
   }
 
   const onChangeRecogLang = (lang: SingleValue<Option>, meta: ActionMeta<Option>) => {
-    const newValue = lang?.value || recogLang
+    const newValue = lang?.value ?? recogLang
     setRecogLang(newValue)
     saveConfig('recogLang', newValue)
   }
 
   const onChangeTransLang = (lang: SingleValue<Option>, meta: ActionMeta<Option>) => {
-    const newValue = lang?.value || transLang
+    const newValue = lang?.value ?? transLang
     setTransLang(newValue)
     saveConfig('transLang', newValue)
   }
@@ -131,45 +142,45 @@ export function Main() {
   }
 
   const onChangeRecogFontColor = (e: any) => {
-    const newValue = e?.target?.value || recogFontColor
+    const newValue = e?.target?.value ?? recogFontColor
     setRecogFontColor(newValue)
     saveConfig('recogFontColor', newValue)
   }
 
   const onChangeTransFontColor = (e: any) => {
-    const newValue = e?.target?.value || transFontColor
+    const newValue = e?.target?.value ?? transFontColor
     setTransFontColor(newValue)
     saveConfig('transFontColor', newValue)
   }
 
   const onChangeRecogFontStrokeColor = (e: any) => {
-    const newValue = e?.target?.value || recogFontStrokeColor
+    const newValue = e?.target?.value ?? recogFontStrokeColor
     setRecogFontStrokeColor(newValue)
     saveConfig('recogFontStrokeColor', newValue)
   }
 
   const onChangeTransFontStrokeColor = (e: any) => {
-    const newValue = e?.target?.value || transFontStrokeColor
+    const newValue = e?.target?.value ?? transFontStrokeColor
     setTransFontStrokeColor(newValue)
     saveConfig('transFontStrokeColor', newValue)
   }
 
   const onChangeBgColor = (e: any) => {
-    const newValue = e?.target?.value || bgColor
+    const newValue = e?.target?.value ?? bgColor
     setBgColor(newValue)
     saveConfig('bgColor', newValue)
   }
 
   const onChangeRecogFontSize = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) || recogFontSize
+    const newNum = Number(newValue) ?? recogFontSize
     setRecogFontSize(newNum)
     saveConfig('recogFontSize', newNum)
   }
 
   const onChangeRecogFontWeight = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) || recogFontWeight
+    const newNum = Number(newValue) ?? recogFontWeight
     setRecogFontWeight(newNum)
     saveConfig('recogFontWeight', newNum)
   }
@@ -183,14 +194,14 @@ export function Main() {
 
   const onChangeTransFontSize = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) || transFontSize
+    const newNum = Number(newValue) ?? transFontSize
     setTransFontSize(newNum)
     saveConfig('transFontSize', newNum)
   }
 
   const onChangeTransFontWeight = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) || transFontWeight
+    const newNum = Number(newValue) ?? transFontWeight
     setTransFontWeight(newNum)
     saveConfig('transFontWeight', newNum)
   }
@@ -234,27 +245,29 @@ export function Main() {
     saveConfig('transHeight', newNum)
   }
 
-  const handleKeyPress = useCallback((event: KeyboardEvent) => {
-    if (event.key === "s" || event.code === "KeyS"){
-      const tmp = recogLang
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 's' || event.code === 'KeyS') {
+        const tmp = recogLang
 
-      setRecogLang(transLang)
-      saveConfig('recogLang', transLang)
+        setRecogLang(transLang)
+        saveConfig('recogLang', transLang)
 
-      setTransLang(tmp)
-      saveConfig('transLang', tmp)
-    }
-  }, [recogLang, transLang, setRecogLang, setTransLang, saveConfig]);
-  
-   
+        setTransLang(tmp)
+        saveConfig('transLang', tmp)
+      }
+    },
+    [recogLang, transLang, setRecogLang, setTransLang]
+  )
+
   useEffect(() => {
     // attach the event listener
-    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('keydown', handleKeyPress)
     // remove the event listener
     return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [handleKeyPress]);
+      document.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [handleKeyPress])
 
   return (
     <>
@@ -309,7 +322,6 @@ export function Main() {
               <div>
                 <Label htmlFor="apiKey">API Key</Label>
                 <Input
-                  type="password"
                   name="apiKey"
                   id="apiKey"
                   autoComplete="current-password"
@@ -500,7 +512,7 @@ export function Main() {
           <div className="mt-8 grid lg:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="recogLang">
-                Transcript Speech &nbsp;
+                Transcript Speech{' '}
                 <sup>
                   <a
                     href="https://stackoverflow.com/questions/14257598"
@@ -515,7 +527,7 @@ export function Main() {
                 <LanguageSelect
                   id="recogLang"
                   value={recogLang}
-                  label={translateLanguages[recogLang][0]}
+                  label={translateLanguages[recogLang].english}
                   onChange={onChangeRecogLang}
                 />
               </span>
@@ -534,7 +546,7 @@ export function Main() {
             </div>
             <div>
               <Label htmlFor="transLang">
-                Translation &nbsp;
+                Translation{' '}
                 <sup>
                   <a
                     href="https://cloud.google.com/translate/docs/languages"
@@ -549,7 +561,7 @@ export function Main() {
                 <LanguageSelect
                   id="transLang"
                   value={transLang}
-                  label={translateLanguages[transLang][0]}
+                  label={translateLanguages[transLang].english}
                   onChange={onChangeTransLang}
                 />
               </span>

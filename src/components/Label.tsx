@@ -4,7 +4,7 @@ export interface LabelProps {
   value?: string
 }
 
-export function Label(props: LabelProps) {
+export function Label(props: Readonly<LabelProps>) {
   const { children, htmlFor, value } = props
   return (
     <div className="flex flex-row justify-between">

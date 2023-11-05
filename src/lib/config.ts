@@ -1,9 +1,10 @@
 import { getAllParams, parseBoolean, parseNumber } from '../lib/url'
+import { LanguageKeys } from './types'
 
 export interface Config {
   apiKey?: string
-  recogLang?: string
-  transLang?: string
+  recogLang?: LanguageKeys
+  transLang?: LanguageKeys
   bgColor?: string
   recogFont?: string
   recogFontSize?: number
@@ -33,6 +34,7 @@ export interface Config {
 }
 
 export const defaults = {
+  apiKey: 'AKfycbwG547NojaDKTY8W0dDzT4uiNRrsWQIWCTHDkqL8PRVK9wubiiLP4ESBHWYFyXNfk1L',
   recogLang: 'id',
   transLang: 'de',
   bgColor: '#00ff00',
@@ -61,7 +63,6 @@ export const defaults = {
   showHistory: false,
   recogHeight: 10,
   transHeight: 10,
-  apiKey: 'AKfycbwG547NojaDKTY8W0dDzT4uiNRrsWQIWCTHDkqL8PRVK9wubiiLP4ESBHWYFyXNfk1L'
 }
 
 export const ConfigKeys = [
@@ -97,14 +98,16 @@ export const ConfigKeys = [
 ]
 
 // Avoid race conditions by setting and getting localstorage keys individually
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function saveConfig(key: string, value: any) {
   try {
-    if (value === null || value === undefined) {
+    if (value === undefined) {
       localStorage.removeItem(key)
     } else {
       localStorage.setItem(key, JSON.stringify(value))
     }
   } catch (e) {
+    console.error(`Error saving config ${key}: ${e}`)
     return
   }
 }
@@ -161,32 +164,32 @@ export function toUrlParams(config: Config) {
     })
     .filter((x): x is [string, string] => !!x)
   const params = new URLSearchParams(pairs)
-  return '?' + params.toString() ?? ''
+  return '?' + (params.toString() ?? '')
 }
 
 export function getConfigFromUrlParams() {
   const params = getAllParams()
   const config: Config = {
     phraseSepTime: parseNumber(params.get('phraseSepTime')),
-    recogLang: params.get('recogLang') || undefined,
-    transLang: params.get('transLang') || undefined,
-    recogFont: params.get('recogFont') || undefined,
-    transFont: params.get('transFont') || undefined,
+    recogLang: params.get('recogLang') as LanguageKeys | undefined,
+    transLang: params.get('transLang') as LanguageKeys | undefined,
+    recogFont: params.get('recogFont') ?? undefined,
+    transFont: params.get('transFont') ?? undefined,
     recogFontSize: parseNumber(params.get('recogFontSize')),
     recogFontWeight: parseNumber(params.get('recogFontWeight')),
     recogFontStrokeWidth: parseNumber(params.get('recogFontStrokeWidth')),
     transFontSize: parseNumber(params.get('transFontSize')),
     transFontWeight: parseNumber(params.get('transFontWeight')),
     transFontStrokeWidth: parseNumber(params.get('transFontStrokeWidth')),
-    recogFontColor: params.get('recogFontColor') || undefined,
-    transFontColor: params.get('transFontColor') || undefined,
-    recogFontStrokeColor: params.get('recogFontStrokeColor') || undefined,
-    transFontStrokeColor: params.get('transFontStrokeColor') || undefined,
-    bgColor: params.get('bgColor') || undefined,
+    recogFontColor: params.get('recogFontColor') ?? undefined,
+    transFontColor: params.get('transFontColor') ?? undefined,
+    recogFontStrokeColor: params.get('recogFontStrokeColor') ?? undefined,
+    transFontStrokeColor: params.get('transFontStrokeColor') ?? undefined,
+    bgColor: params.get('bgColor') ?? undefined,
     showFontTest: parseBoolean(params.get('showFontTest')),
     hideConfig: parseBoolean(params.get('hideConfig')),
-    customRecogFont: params.get('customRecogFont') || undefined,
-    customTransFont: params.get('customTransFont') || undefined,
+    customRecogFont: params.get('customRecogFont') ?? undefined,
+    customTransFont: params.get('customTransFont') ?? undefined,
     useCustomRecogFont: parseBoolean(params.get('useCustomRecogFont')),
     useCustomTransFont: parseBoolean(params.get('useCustomTransFont')),
     showHistory: parseBoolean(params.get('showHistory')),

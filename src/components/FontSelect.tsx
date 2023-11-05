@@ -7,12 +7,12 @@ export interface FontSelectProps {
   customFontOnInput: () => void
 }
 
-export default function FontSelect(props: FontSelectProps) {
+export default function FontSelect(props: Readonly<FontSelectProps>) {
   const { id, name, onChange, customFontId, customFontName, customFontOnInput } = props
 
   return (
     <>
-      Font:
+      Font:{' '}
       <select name={name} id={id} onChange={onChange}>
         <option value="direct">[直接指定]</option>
         <option value="M PLUS\ 1p">M PLUS 1p</option>
@@ -45,7 +45,7 @@ export default function FontSelect(props: FontSelectProps) {
         <option value="Sawarabi Gothic">さわらびゴシック</option>
         <option value="Nico Moji">ニコモジ</option>
       </select>
-      Font (custom):
+      Font (custom):{' '}
       <input
         type="text"
         name={customFontName}

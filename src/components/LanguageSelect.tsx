@@ -1,10 +1,10 @@
 import ReactSelect, { ActionMeta, SingleValue } from 'react-select'
-import { useState } from 'react'
+import type { LanguageLabels, LanguageKeys } from '../lib/types'
 
 export type LanguageType = 'transcribe' | 'translate'
 
 export interface LanguageSelectProps {
-  value?: string // Allows passing short language code instead of full react-select OptionType
+  value?: LanguageKeys // Allows passing short language code instead of full react-select OptionType
   label?: string
   languageType?: LanguageType
   id?: string
@@ -16,24 +16,29 @@ export interface LanguageSelectProps {
 //
 // Transcription languages
 // ref: https://stackoverflow.com/questions/14257598
-export const translateLanguages = {
-  en: ['English', 'English'],
-  de: ['German', 'Deutsch'],
-  id: ['Indonesian', 'Bahasa Indonesia'],
+export const translateLanguages: LanguageLabels = {
+  en: {
+    english: 'English',
+    native: 'English',
+  },
+  de: {
+    english: 'German',
+    native: 'Deutsch',
+  },
+  id: {
+    english: 'Indonesian',
+    native: 'Bahasa Indonesia',
+  },
 }
 
 // For simplicity, for now set languages to be the same subset for transcription/translation
 const transcribeLanguages = translateLanguages
 
 export type Option = {
-  value: string
+  value: LanguageKeys
   label: string
 }
 export type { ActionMeta, SingleValue } from 'react-select'
-
-interface ArrayObjectSelectState {
-  selectedOption: Option | null
-}
 
 // Extending react-select
 // ref: https://stackoverflow.com/questions/66348283/
@@ -53,18 +58,18 @@ export function LanguageSelect<
 // ref: https://stackoverflow.com/a/74143834
 export function LanguageSelect({
   languageType = 'translate',
-  value,
-  label,
+  value = 'en',
+  label = 'English',
   onChange,
   id,
   ...props
 }: LanguageSelectProps) {
   const languages = languageType === 'translate' ? translateLanguages : transcribeLanguages
-  
+
   const languageOptions: Option[] = Object.entries(languages).map(([key, value]) => {
     return {
-      value: key ?? '',
-      label: value[0] ?? '',
+      value: (key as LanguageKeys) ?? '',
+      label: value.english ?? '',
     }
   })
 
@@ -74,34 +79,32 @@ export function LanguageSelect({
   }
 
   return (
-    <>
-      <ReactSelect
-        inputId={id}
-        options={languageOptions}
-        getOptionLabel={(opt: Option) => opt.label}
-        getOptionValue={(opt: Option) => opt.value}
-        value={option}
-        onChange={onChange}
-        isSearchable
-        components={{
-          // Hide dropdown indicator to match fontpicker
-          IndicatorSeparator: () => null,
-          DropdownIndicator: () => null,
-        }}
-        className="w-64"
-        //styles={{
-        //  control: base => ({
-        //    ...base,
-        //    '&:active': {
-        //      border: '1px solid #000',
-        //    },
-        //    '&:focus': {
-        //      border: '1px solid #000',
-        //    }
-        //  })
-        //}}
-        {...props}
-      />
-    </>
+    <ReactSelect
+      inputId={id}
+      options={languageOptions}
+      getOptionLabel={(opt: Option) => opt.label}
+      getOptionValue={(opt: Option) => opt.value}
+      value={option}
+      onChange={onChange}
+      isSearchable
+      components={{
+        // Hide dropdown indicator to match fontpicker
+        IndicatorSeparator: () => null,
+        DropdownIndicator: () => null,
+      }}
+      className="w-64"
+      //styles={{
+      //  control: base => ({
+      //    ...base,
+      //    '&:active': {
+      //      border: '1px solid #000',
+      //    },
+      //    '&:focus': {
+      //      border: '1px solid #000',
+      //    }
+      //  })
+      //}}
+      {...props}
+    />
   )
 }

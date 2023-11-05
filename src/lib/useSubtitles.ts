@@ -7,7 +7,7 @@ import { E_ALREADY_LOCKED, Mutex, tryAcquire } from 'async-mutex'
 
 export default SpeechRecognition
 
-export interface useSubtitlesProps {
+export interface Props {
   recogLang?: string
   transLang?: string
   interimResults?: boolean
@@ -21,7 +21,7 @@ export interface useSubtitlesProps {
   showHistory?: boolean
 }
 
-export function useSubtitles(props: useSubtitlesProps = {}) {
+export function useSubtitles(props: Props = {}) {
   const [translation, setTranslation] = useState('')
 
   const maxLogSize = 5000 // Fairly arbitrary, rendering plaintext is cheap

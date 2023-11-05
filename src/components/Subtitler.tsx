@@ -1,34 +1,37 @@
-import { useState, useEffect, useCallback } from 'react';
-import SpeechRecognition, { useSubtitles } from '../lib/useSubtitles';
-import { Subtitle } from './Subtitle';
-import { IconToggle } from './IconToggle';
-import { MicIcon } from './icons/MicIcon';
-import { SettingsIcon } from './icons/SettingsIcon';
+import { useState, useEffect, useCallback } from 'react'
+import SpeechRecognition, { useSubtitles } from '../lib/useSubtitles'
+import { Subtitle } from './Subtitle'
+import { IconToggle } from './IconToggle'
+import { MicIcon } from './icons/MicIcon'
+import { MaximizeIcon } from './icons/MaximizeIcon'
+import { SettingsIcon } from './icons/SettingsIcon'
+import { FullScreen, useFullScreenHandle } from 'react-full-screen'
+import { LanguageKeys } from '../lib/types'
 
 export interface SubtitlerProps {
-  apiKey?: string;
-  phraseSepTime: number;
-  recogLang: string;
-  transLang: string;
-  recogFont: string;
-  transFont: string;
-  bgColor: string;
-  recogFontColor: string;
-  transFontColor: string;
-  recogFontStrokeColor: string;
-  transFontStrokeColor: string;
-  recogFontSize: number;
-  recogFontWeight: number;
-  recogFontStrokeWidth: number;
-  transFontSize: number;
-  transFontWeight: number;
-  transFontStrokeWidth: number;
-  showFontTest?: boolean;
-  showHistory?: boolean;
-  hideConfig?: boolean;
-  onToggleHideConfig?: () => void;
-  recogHeight?: number;
-  transHeight?: number;
+  apiKey?: string
+  phraseSepTime: number
+  recogLang: LanguageKeys
+  transLang: LanguageKeys
+  recogFont: string
+  transFont: string
+  bgColor: string
+  recogFontColor: string
+  transFontColor: string
+  recogFontStrokeColor: string
+  transFontStrokeColor: string
+  recogFontSize: number
+  recogFontWeight: number
+  recogFontStrokeWidth: number
+  transFontSize: number
+  transFontWeight: number
+  transFontStrokeWidth: number
+  showFontTest?: boolean
+  showHistory?: boolean
+  hideConfig?: boolean
+  onToggleHideConfig?: () => void
+  recogHeight?: number
+  transHeight?: number
 }
 
 export function Subtitler({
@@ -55,9 +58,9 @@ export function Subtitler({
   onToggleHideConfig,
   recogHeight,
   transHeight,
-}: SubtitlerProps) {
-  const [enabled, setEnabled] = useState(false);
-  const [lastTranscript, setLastTranscript] = useState('');
+}: Readonly<SubtitlerProps>) {
+  const [enabled, setEnabled] = useState(false)
+  const handle = useFullScreenHandle()
 
   const {
     transcript,
@@ -73,72 +76,68 @@ export function Subtitler({
     phraseSepTime,
     enabled,
     showHistory,
-  });
+  })
 
-  const handleStart = async () => {
-    setEnabled(true);
+  const handleStart = useCallback(async () => {
+    setEnabled(true)
     await SpeechRecognition.startListening({
       language: recogLang,
       continuous: true,
-    });
-  };
+    })
+  }, [recogLang])
 
-  const handleStop = async () => {
-    setEnabled(false);
-    await SpeechRecognition.abortListening();
-  };
+  const handleStop = useCallback(async () => {
+    setEnabled(false)
+    await SpeechRecognition.abortListening()
+  }, [])
 
-  const handleReset = () => {
-    reset();
-    setLastTranscript('');
-  };
+  const handleReset = useCallback(() => {
+    reset()
+  }, [reset])
 
-  let error;
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Enter' || event.code === 'Enter') {
+        handleReset()
+      }
+
+      if (event.key === 'r' || event.code === 'keyR') {
+        handleStop().then(() => handleStart())
+      }
+    },
+    [handleReset, handleStop, handleStart]
+  )
+
+  useEffect(() => {
+    // attach the event listener
+    document.addEventListener('keydown', handleKeyPress)
+
+    // remove the event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [handleKeyPress])
+
+  let error
   if (!browserSupportsSpeechRecognition) {
-    error = "Your browser doesn't support speech recognition :(";
+    error = "Your browser doesn't support speech recognition :("
   } else if (!isMicrophoneAvailable) {
-    error = 'Please allow this page to access your microphone';
+    error = 'Please allow this page to access your microphone'
   } else if (!navigator.onLine) {
-    error = 'Device offline! Speech recognition requires an internet connection';
+    error = 'Device offline! Speech recognition requires an internet connection'
   }
 
   if (error) {
-    return (
-      <>
-        <p>{error}</p>
-      </>
-    );
+    return <p>{error}</p>
   }
 
   const testText = `Qui accusamus iure qui tempora laboriosam ut ut. Ut voluptatem ut repudiandae. Ipsam distinctio aut sed architecto est velit fugit velit. Soluta nesciunt consequatur labore.
   // ... (rest of your test text)
-  `;
-
-  const handleKeyPress = useCallback(async (event: KeyboardEvent) => {
-    if (event.key === "Enter" || event.code === "Enter"){
-        handleReset();
-    }
-
-    if (event.key === "r" || event.code === "keyR"){
-      await handleStop()
-      await handleStart()
-    }
-  }, [handleReset, handleStop, handleStart]);
-  
-   
-  useEffect(() => {
-    // attach the event listener
-    document.addEventListener('keydown', handleKeyPress);
-
-    // remove the event listener
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [handleKeyPress]);
+  `
 
   return (
     <>
-      <div className='min-h-screen flex flex-col justify-between'>
+      <FullScreen handle={handle}>
         {showFontTest && (
           <Subtitle
             fontFamily={recogFont}
@@ -153,6 +152,7 @@ export function Subtitler({
             fontStrokeWidth={recogFontStrokeWidth}
             scrollBottom={false}
             height={recogHeight}
+            lang={recogLang}
           />
         )}
         <Subtitle
@@ -166,7 +166,8 @@ export function Subtitler({
           fontWeight={recogFontWeight}
           fontStrokeWidth={recogFontStrokeWidth}
           height={recogHeight}
-          lang={recogLang}        />
+          lang={recogLang}
+        />
         <Subtitle
           fontFamily={transFont}
           value={translation1}
@@ -181,7 +182,7 @@ export function Subtitler({
           height={transHeight}
           lang={transLang}
         />
-      </div>
+      </FullScreen>
       <div className="p-8 border border-gray-200">
         <div className="flex justify-between">
           <div className="flex space-x-4">
@@ -210,6 +211,12 @@ export function Subtitler({
             >
               Reset
             </button>
+            <button
+              onClick={handle.enter}
+              className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+            >
+              <MaximizeIcon />
+            </button>
           </div>
           <div className="space-x-4 ml-auto">
             <IconToggle
@@ -223,5 +230,5 @@ export function Subtitler({
         </div>
       </div>
     </>
-  );
+  )
 }
