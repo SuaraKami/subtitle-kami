@@ -298,8 +298,8 @@ export function Main() {
       />
       {!hideConfig && (
         <div className="p-8 border border-gray-200">
-          <h1 className="font-medium text-3xl">subtitle-chan</h1>
-          <p className="mt-4">This is a live demo showing how to use subtitle-chan.</p>
+          <h1 className="font-medium text-3xl">SubtitleKami</h1>
+          <p className="mt-4">This is a live demo showing how to use SubtitleKami.</p>
           <p className="mt-4">
             See <a href="https://github.com/ae9is/subtitle-chan#readme">github repo</a> for
             installation instructions.
@@ -316,7 +316,7 @@ export function Main() {
                   autoComplete="username"
                   size={0}
                   hidden={true}
-                  defaultValue="subtitle-chan"
+                  defaultValue="SubtitleKami"
                 />
               </div>
               <div>

@@ -1,29 +1,7 @@
 {
-  "name": "subtitle-chan",
+  "name": "subtitle-kami",
   "version": "0.0.0",
   "private": true,
-  "description": "Live speech transcription and translation in your browser",
-  "keywords": [
-    "subtitle",
-    "transcription",
-    "translation",
-    "speech",
-    "google",
-    "translate"
-  ],
-  "homepage": "https://ae9is.github.io/subtitle-chan",
-  "bugs": {
-    "url": "https://github.com/ae9is/subtitle-chan/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ae9is/subtitle-chan.git"
-  },
-  "author": {
-    "name": "ae9is",
-    "email": "aegis.opensource@gmail.com"
-  },
-  "license": "MIT",
   "files": [
     "docs"
   ],

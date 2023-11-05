@@ -7,7 +7,7 @@
     "distDir": "../docs"
   },
   "package": {
-    "productName": "subtitle-chan",
+    "productName": "subtitle-kami",
     "version": "0.1.0"
   },
   "tauri": {
