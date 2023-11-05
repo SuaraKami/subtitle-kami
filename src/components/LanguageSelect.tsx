@@ -63,7 +63,7 @@ export function LanguageSelect({
   onChange,
   id,
   ...props
-}: LanguageSelectProps) {
+}: Readonly<LanguageSelectProps>) {
   const languages = languageType === 'translate' ? translateLanguages : transcribeLanguages
 
   const languageOptions: Option[] = Object.entries(languages).map(([key, value]) => {

@@ -91,7 +91,7 @@ export function Main() {
 
   const onChangePhraseSepTime = (e: any) => {
     const newValue = e?.target?.value
-    let newNum = Number(newValue) ?? phraseSepTime
+    let newNum = Number(newValue) || phraseSepTime
     if (newNum < minPhraseSepTime) {
       newNum = minPhraseSepTime
     }
@@ -173,42 +173,42 @@ export function Main() {
 
   const onChangeRecogFontSize = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) ?? recogFontSize
+    const newNum = Number(newValue) || recogFontSize
     setRecogFontSize(newNum)
     saveConfig('recogFontSize', newNum)
   }
 
   const onChangeRecogFontWeight = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) ?? recogFontWeight
+    const newNum = Number(newValue) || recogFontWeight
     setRecogFontWeight(newNum)
     saveConfig('recogFontWeight', newNum)
   }
 
   const onChangeRecogFontStrokeWidth = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) ?? recogFontStrokeWidth
+    const newNum = Number(newValue) || recogFontStrokeWidth
     setRecogFontStrokeWidth(newNum)
     saveConfig('recogFontStrokeWidth', newNum)
   }
 
   const onChangeTransFontSize = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) ?? transFontSize
+    const newNum = Number(newValue) || transFontSize
     setTransFontSize(newNum)
     saveConfig('transFontSize', newNum)
   }
 
   const onChangeTransFontWeight = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) ?? transFontWeight
+    const newNum = Number(newValue) || transFontWeight
     setTransFontWeight(newNum)
     saveConfig('transFontWeight', newNum)
   }
 
   const onChangeTransFontStrokeWidth = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) ?? transFontStrokeWidth
+    const newNum = Number(newValue) || transFontStrokeWidth
     setTransFontStrokeWidth(newNum)
     saveConfig('transFontStrokeWidth', newNum)
   }
@@ -233,14 +233,14 @@ export function Main() {
 
   const onChangeRecogHeight = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) ?? recogHeight
+    const newNum = Number(newValue) || recogHeight
     setRecogHeight(newNum)
     saveConfig('recogHeight', newNum)
   }
 
   const onChangeTransHeight = (e: any) => {
     const newValue = e?.target?.value
-    const newNum = Number(newValue) ?? transHeight
+    const newNum = Number(newValue) || transHeight
     setTransHeight(newNum)
     saveConfig('transHeight', newNum)
   }
