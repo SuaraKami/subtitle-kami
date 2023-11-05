@@ -293,6 +293,7 @@ export function Subtitler({
               <button
                 onClick={handlePrev}
                 className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+                disabled={showHistory}
               >
                 <PreviousIcon />
               </button>
@@ -302,6 +303,7 @@ export function Subtitler({
               <button
                 onClick={handleNext}
                 className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+                disabled={showHistory}
               >
                 <NextIcon />
               </button>
