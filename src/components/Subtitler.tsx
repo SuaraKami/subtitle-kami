@@ -151,9 +151,7 @@ export function Subtitler({
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Enter' || event.code === 'Enter') {
-        handleStart()
-      } else if (event.key === 'Escape' || event.code === 'Escape') {
-        handleStop()
+        enabled ? handleStop() : handleStart()
       } else if (event.key === 'r' || event.code === 'KeyR') {
         handleReset()
       } else if (event.key === 'n' || event.code === 'KeyN') {
@@ -168,6 +166,7 @@ export function Subtitler({
       }
     },
     [
+      enabled,
       handleStart,
       handleStop,
       handleRestart,
@@ -270,7 +269,7 @@ export function Subtitler({
               </ShortcutTooltip>
             )}
             {enabled && (
-              <ShortcutTooltip shortcut="Esc">
+              <ShortcutTooltip shortcut="↵">
                 <button
                   onClick={handleStop}
                   className="w-32 py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 active:bg-red-700 disabled:opacity-50"
