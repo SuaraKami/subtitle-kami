@@ -34,7 +34,7 @@ export interface Config {
 }
 
 export const defaults = {
-  apiKey: 'AKfycbwG547NojaDKTY8W0dDzT4uiNRrsWQIWCTHDkqL8PRVK9wubiiLP4ESBHWYFyXNfk1L',
+  apiKey: import.meta.env.VITE_API_KEY ?? '',
   recogLang: 'id',
   transLang: 'de',
   bgColor: '#f2e9e4',
