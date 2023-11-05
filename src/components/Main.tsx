@@ -245,29 +245,20 @@ export function Main() {
     saveConfig('transHeight', newNum)
   }
 
-  const handleKeyPress = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 's' || event.code === 'KeyS') {
-        const tmp = recogLang
+  const handleSwitch = useCallback(() => {
+    const newRecogLang = transLang
+    setRecogLang(newRecogLang)
+    saveConfig('recogLang', newRecogLang)
 
-        setRecogLang(transLang)
-        saveConfig('recogLang', transLang)
+    const newTransLang = recogLang // actually safe, because state is not updated directly
+    setTransLang(newTransLang)
+    saveConfig('transLang', newTransLang)
 
-        setTransLang(tmp)
-        saveConfig('transLang', tmp)
-      }
-    },
-    [recogLang, transLang, setRecogLang, setTransLang]
-  )
-
-  useEffect(() => {
-    // attach the event listener
-    document.addEventListener('keydown', handleKeyPress)
-    // remove the event listener
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress)
+    return {
+      recogLang: newRecogLang,
+      transLang: newTransLang,
     }
-  }, [handleKeyPress])
+  }, [recogLang, transLang, setRecogLang, setTransLang])
 
   return (
     <>
@@ -295,15 +286,11 @@ export function Main() {
         onToggleHideConfig={onToggleHideConfig}
         recogHeight={recogHeight}
         transHeight={transHeight}
+        handleSwitch={handleSwitch}
       />
       {!hideConfig && (
         <div className="p-8 border border-gray-200">
           <h1 className="font-medium text-3xl">SubtitleKami</h1>
-          <p className="mt-4">This is a live demo showing how to use SubtitleKami.</p>
-          <p className="mt-4">
-            See <a href="https://github.com/ae9is/subtitle-chan#readme">github repo</a> for
-            installation instructions.
-          </p>
           <div className="mt-8 space-y-6">
             <form id="apiKeyForm" name="apiKeyForm">
               <div>

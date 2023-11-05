@@ -4,9 +4,13 @@ import { Subtitle } from './Subtitle'
 import { IconToggle } from './IconToggle'
 import { MicIcon } from './icons/MicIcon'
 import { MaximizeIcon } from './icons/MaximizeIcon'
+import { NextIcon } from './icons/NextIcon'
+import { PreviousIcon } from './icons/PreviousIcon'
 import { SettingsIcon } from './icons/SettingsIcon'
+import { SwitchIcon } from './icons/SwitchIcon'
 import { FullScreen, useFullScreenHandle } from 'react-full-screen'
 import { LanguageKeys } from '../lib/types'
+import { ShortcutTooltip } from './ShortcutTooltip'
 
 export interface SubtitlerProps {
   apiKey?: string
@@ -32,6 +36,10 @@ export interface SubtitlerProps {
   onToggleHideConfig?: () => void
   recogHeight?: number
   transHeight?: number
+  handleSwitch: () => {
+    recogLang: LanguageKeys
+    transLang: LanguageKeys
+  }
 }
 
 export function Subtitler({
@@ -58,9 +66,9 @@ export function Subtitler({
   onToggleHideConfig,
   recogHeight,
   transHeight,
+  handleSwitch,
 }: Readonly<SubtitlerProps>) {
   const [enabled, setEnabled] = useState(false)
-  const handle = useFullScreenHandle()
 
   const {
     transcript,
@@ -75,37 +83,100 @@ export function Subtitler({
     apiKey,
     phraseSepTime,
     enabled,
-    showHistory,
+    showHistory: true,
   })
 
-  const handleStart = useCallback(async () => {
+  const translations = translation1.split('\n')
+
+  const [translateFrom, setTranslateFrom] = useState(showHistory ? 0 : translations.length - 1)
+  const [translateTo, setTranslateTo] = useState(translations.length - 1)
+
+  useEffect(() => {
+    setTranslateFrom(showHistory ? 0 : translations.length - 1)
+    setTranslateTo(translations.length - 1)
+  }, [translations.length, showHistory])
+
+  const dynamicTranslate = translations.slice(translateFrom, translateTo + 1).join('\n')
+
+  const handleStart = useCallback(() => {
     setEnabled(true)
-    await SpeechRecognition.startListening({
+    SpeechRecognition.startListening({
       language: recogLang,
       continuous: true,
     })
   }, [recogLang])
 
-  const handleStop = useCallback(async () => {
+  const handleStop = useCallback(() => {
+    SpeechRecognition.abortListening()
     setEnabled(false)
-    await SpeechRecognition.abortListening()
   }, [])
 
   const handleReset = useCallback(() => {
     reset()
   }, [reset])
 
+  const handleRestart = useCallback(
+    async (recogLang: LanguageKeys) => {
+      if (enabled) {
+        handleReset()
+        await SpeechRecognition.abortListening()
+        await SpeechRecognition.startListening({
+          language: recogLang,
+          continuous: true,
+        })
+      }
+    },
+    [enabled, handleReset]
+  )
+
+  const handleNext = useCallback(() => {
+    if (showHistory) return
+    setTranslateFrom(Math.min(translateFrom + 1, translations.length - 1))
+  }, [translateFrom, translations.length, showHistory])
+
+  const handlePrev = useCallback(() => {
+    if (showHistory) return
+    setTranslateFrom(Math.max(translateFrom - 1, 0))
+  }, [translateFrom, showHistory])
+
+  const fullScreenHandler = useFullScreenHandle()
+  const handleFullScreen = useCallback(() => {
+    if (fullScreenHandler.active) {
+      fullScreenHandler.exit()
+    } else {
+      fullScreenHandler.enter()
+    }
+  }, [fullScreenHandler])
+
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Enter' || event.code === 'Enter') {
+        handleStart()
+      } else if (event.key === 'Escape' || event.code === 'Escape') {
+        handleStop()
+      } else if (event.key === 'r' || event.code === 'KeyR') {
         handleReset()
-      }
-
-      if (event.key === 'r' || event.code === 'keyR') {
-        handleStop().then(() => handleStart())
+      } else if (event.key === 'n' || event.code === 'KeyN') {
+        handleNext()
+      } else if (event.key === 'p' || event.code === 'KeyP') {
+        handlePrev()
+      } else if (event.key === 'f' || event.code === 'KeyF') {
+        handleFullScreen()
+      } else if (event.key === 's' || event.code === 'KeyS') {
+        const { recogLang } = handleSwitch()
+        handleRestart(recogLang)
       }
     },
-    [handleReset, handleStop, handleStart]
+    [
+      handleStart,
+      handleStop,
+      handleRestart,
+      handleNext,
+      handlePrev,
+      handleReset,
+      handleSwitch,
+      handleFullScreen,
+    ]
   )
 
   useEffect(() => {
@@ -137,7 +208,7 @@ export function Subtitler({
 
   return (
     <>
-      <FullScreen handle={handle}>
+      <FullScreen handle={fullScreenHandler}>
         {showFontTest && (
           <Subtitle
             fontFamily={recogFont}
@@ -152,7 +223,6 @@ export function Subtitler({
             fontStrokeWidth={recogFontStrokeWidth}
             scrollBottom={false}
             height={recogHeight}
-            lang={recogLang}
           />
         )}
         <Subtitle
@@ -170,7 +240,7 @@ export function Subtitler({
         />
         <Subtitle
           fontFamily={transFont}
-          value={translation1}
+          value={dynamicTranslate}
           inputId="transSubtitles"
           bgColor={bgColor}
           fontColor={transFontColor}
@@ -190,33 +260,70 @@ export function Subtitler({
               <MicIcon stroke={listening ? 'red' : 'black'} fill={listening ? 'red' : 'none'} />
             </span>
             {!enabled && (
-              <button
-                onClick={handleStart}
-                className="w-32 py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600 active:bg-green-700 disabled:opacity-50"
-              >
-                Start
-              </button>
+              <ShortcutTooltip shortcut="↵">
+                <button
+                  onClick={handleStart}
+                  className="w-32 py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600 active:bg-green-700 disabled:opacity-50"
+                >
+                  Start
+                </button>
+              </ShortcutTooltip>
             )}
             {enabled && (
-              <button
-                onClick={handleStop}
-                className="w-32 py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 active:bg-red-700 disabled:opacity-50"
-              >
-                Stop
-              </button>
+              <ShortcutTooltip shortcut="Esc">
+                <button
+                  onClick={handleStop}
+                  className="w-32 py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600 active:bg-red-700 disabled:opacity-50"
+                >
+                  Stop
+                </button>
+              </ShortcutTooltip>
             )}
-            <button
-              onClick={handleReset}
-              className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
-            >
-              Reset
-            </button>
-            <button
-              onClick={handle.enter}
-              className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
-            >
-              <MaximizeIcon />
-            </button>
+
+            <ShortcutTooltip shortcut="R">
+              <button
+                onClick={handleReset}
+                className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+              >
+                Reset
+              </button>
+            </ShortcutTooltip>
+
+            <ShortcutTooltip shortcut="P">
+              <button
+                onClick={handlePrev}
+                className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+              >
+                <PreviousIcon />
+              </button>
+            </ShortcutTooltip>
+
+            <ShortcutTooltip shortcut="N">
+              <button
+                onClick={handleNext}
+                className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+              >
+                <NextIcon />
+              </button>
+            </ShortcutTooltip>
+
+            <ShortcutTooltip shortcut="S">
+              <button
+                className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+                disabled
+              >
+                <SwitchIcon />
+              </button>
+            </ShortcutTooltip>
+
+            <ShortcutTooltip shortcut="F">
+              <button
+                onClick={handleFullScreen}
+                className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
+              >
+                <MaximizeIcon />
+              </button>
+            </ShortcutTooltip>
           </div>
           <div className="space-x-4 ml-auto">
             <IconToggle

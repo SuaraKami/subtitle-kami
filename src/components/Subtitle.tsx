@@ -17,7 +17,7 @@ export interface SubtitleProps {
   inputId?: string
   scrollBottom?: boolean
   height?: number
-  lang: LanguageKeys
+  lang?: LanguageKeys
 }
 
 export function Subtitle(props: Readonly<SubtitleProps>) {
@@ -66,15 +66,18 @@ export function Subtitle(props: Readonly<SubtitleProps>) {
         backgroundColor: bgColor,
       }}
     >
-      <h3
-        className="text-sm font-bold underline"
-        style={{
-          fontFamily,
-          color: fontColor,
-        }}
-      >
-        {translateLanguages[lang].native}
-      </h3>
+      {lang && (
+        <h3
+          className="text-sm font-bold underline"
+          style={{
+            fontFamily,
+            color: fontColor,
+          }}
+        >
+          {translateLanguages[lang].native}
+        </h3>
+      )}
+
       <textarea
         ref={textarea}
         id={inputId}

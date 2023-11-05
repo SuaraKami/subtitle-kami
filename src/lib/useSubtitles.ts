@@ -94,7 +94,10 @@ export function useSubtitles(props: Props = {}) {
       // Immediately fails if lock isn't available
       await tryAcquire(mutex).runExclusive(async () => {
         const text = finalTranscript?.trim()
-        setTranscriptLog((prev) => appendToFixedSizeString(prev, '' + text, maxLogSize))
+        setTranscriptLog((prev) => {
+          const separator = prev.length > 0 ? '\n' : ''
+          return appendToFixedSizeString(prev, separator + text, maxLogSize)
+        })
         resetTranscript()
         if (apiKey) {
           await doQuery(text, usePost)
@@ -121,10 +124,10 @@ export function useSubtitles(props: Props = {}) {
     let query
     if (usePost) {
       query = `${transUrl}?source=${recogLang}&target=${transLang}`
-      logger.log('query: POST ' + query + ', body: ' + text)
+      // logger.log('query: POST ' + query + ', body: ' + text)
     } else {
       query = `${transUrl}?text=${text}&source=${recogLang}&target=${transLang}`
-      logger.log('query: GET ' + query)
+      // logger.log('query: GET ' + query)
     }
     try {
       const requestConfig = {
@@ -139,21 +142,28 @@ export function useSubtitles(props: Props = {}) {
         resp = await axios.get(query, requestConfig)
       }
       const trans = resp?.data ?? ''
-      logger.log('resp: ' + trans)
+      // logger.log('resp: ' + trans)
       if (trans) {
         setTranslation(trans)
-        setTranslationLog((prev) => appendToFixedSizeString(prev, '\n' + trans, maxLogSize))
+        setTranslationLog((prev) => {
+          const separator = prev.length > 0 ? '\n' : ''
+          return appendToFixedSizeString(prev, separator + trans, maxLogSize)
+        })
       }
     } catch (e) {
       logger.error(e)
     }
   }
 
-  const returnedTranscript = showHistory
-    ? transcriptLog
-    : interimResults
-    ? transcript
-    : finalTranscript
+  let returnedTranscript
+  if (showHistory) {
+    returnedTranscript = transcriptLog
+  } else if (interimResults) {
+    returnedTranscript = transcript
+  } else {
+    returnedTranscript = finalTranscript
+  }
+
   const returnedTranslation = showHistory ? translationLog : translation
 
   return {
