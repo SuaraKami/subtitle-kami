@@ -53,7 +53,16 @@ export function useSubtitles(props: Props = {}) {
 
   const mutex = new Mutex()
 
-  const requestTranslationQuery = async (phraseSepTime: number) => {
+  const dynamicPhraseSepTime = phraseSepTime
+
+  const reset = async () => {
+    resetTranscript()
+    setTranslation('')
+    setTranscriptLog('')
+    setTranslationLog('')
+  }
+
+  const requestTranslationQuery = async (dynamicPhraseSepTime: number) => {
     try {
       await tryAcquire(mutex).runExclusive(async () => {
         const text = finalTranscript?.trim()
@@ -63,7 +72,7 @@ export function useSubtitles(props: Props = {}) {
         })
         resetTranscript()
         if (apiKey) {
-          await doQuery(text, usePost, phraseSepTime)
+          await doQuery(text, usePost, dynamicPhraseSepTime)
         }
       })
     } catch (e) {
@@ -87,7 +96,7 @@ export function useSubtitles(props: Props = {}) {
     if (interimResults) {
       handleTranscriptChange()
     }
-  }, [finalTranscript, maxPhraseLength, minPhraseLength, phraseSepTime])
+  }, [finalTranscript, maxPhraseLength, minPhraseLength, dynamicPhraseSepTime])
 
   const doQuery = async (text: string, usePost = false, dynamicPhraseSepTime: any) => {
     let query
@@ -136,7 +145,7 @@ export function useSubtitles(props: Props = {}) {
     transcript: returnedTranscript,
     translation1: returnedTranslation,
     listening,
-    reset: resetTranscript,
+    reset,
     browserSupportsSpeechRecognition,
     isMicrophoneAvailable,
   }
