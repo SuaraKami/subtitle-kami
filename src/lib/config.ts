@@ -31,6 +31,9 @@ export interface Config {
   showHistory?: boolean
   recogHeight?: number
   transHeight?: number
+  averageReadSpeed?: number
+  minDisplayTime?: number
+  maxDisplayTime?: number
 }
 
 export const defaults = {
@@ -63,6 +66,9 @@ export const defaults = {
   showHistory: false,
   recogHeight: 20,
   transHeight: 20,
+  averageReadSpeed: 200,
+  minDisplayTime: 2000,
+  maxDisplayTime: 5000,
 }
 
 export const ConfigKeys = [
@@ -95,11 +101,14 @@ export const ConfigKeys = [
   'showHistory',
   'recogHeight',
   'transHeight',
-]
+  'averageReadSpeed',
+  'minDisplayTime',
+  'maxDisplayTime',
+] as const
 
 // Avoid race conditions by setting and getting localstorage keys individually
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function saveConfig(key: string, value: any) {
+export function saveConfig(key: (typeof ConfigKeys)[number], value: any) {
   try {
     if (value === undefined) {
       localStorage.removeItem(key)
@@ -150,6 +159,9 @@ export function getAllConfig() {
     showHistory: getConfig('showHistory'),
     recogHeight: getConfig('recogHeight'),
     transHeight: getConfig('transHeight'),
+    averageReadSpeed: getConfig('averageReadSpeed'),
+    minDisplayTime: getConfig('minDisplayTime'),
+    maxDisplayTime: getConfig('maxDisplayTime'),
   }
   return config
 }
@@ -195,6 +207,9 @@ export function getConfigFromUrlParams() {
     showHistory: parseBoolean(params.get('showHistory')),
     recogHeight: parseNumber(params.get('recogHeight')),
     transHeight: parseNumber(params.get('transHeight')),
+    averageReadSpeed: parseNumber(params.get('averageReadSpeed')),
+    minDisplayTime: parseNumber(params.get('minDisplayTime')),
+    maxDisplayTime: parseNumber(params.get('maxDisplayTime')),
   }
   return config
 }
@@ -203,7 +218,7 @@ export function saveConfigFromUrlParams() {
   const paramsConfig = getConfigFromUrlParams()
   Object.entries(paramsConfig).forEach(([key, value]) => {
     if (value !== null && value !== undefined) {
-      saveConfig(key, value)
+      saveConfig(key as (typeof ConfigKeys)[number], value)
     }
   })
 }

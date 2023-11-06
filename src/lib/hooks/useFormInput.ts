@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { defaults, getAllConfig, saveConfig } from '../config'
-import { ActionMeta, SingleValue, Option, LanguageKeys } from '../types'
+import { SingleValue, Option, LanguageKeys } from '../types'
 
 export function useFormInput() {
   const config = getAllConfig()
@@ -70,9 +70,40 @@ export function useFormInput() {
   const [recogHeight, setRecogHeight] = useState<number>(config.recogHeight ?? defaults.recogHeight)
   const [transHeight, setTransHeight] = useState<number>(config.transHeight ?? defaults.transHeight)
 
+  const [averageReadSpeed, setAverageReadSpeed] = useState<number>(
+    config.averageReadSpeed ?? defaults.averageReadSpeed
+  )
+  const [minDisplayTime, setMinDisplayTime] = useState<number>(
+    config.minDisplayTime ?? defaults.minDisplayTime
+  )
+  const [maxDisplayTime, setMaxDisplayTime] = useState<number>(
+    config.maxDisplayTime ?? defaults.maxDisplayTime
+  )
+
   const onChangeApiKey = (e: any) => {
     const newApiKey = e?.target?.value ?? ''
     setApiKey(newApiKey)
+  }
+
+  const onChangeAverageReadSpeed = (e: any) => {
+    const newValue = e?.target?.value
+    const newNum = Number(newValue) || averageReadSpeed
+    setAverageReadSpeed(newNum)
+    saveConfig('averageReadSpeed', newNum)
+  }
+
+  const onChangeMinDisplayTime = (e: any) => {
+    const newValue = e?.target?.value
+    const newNum = Number(newValue) || minDisplayTime
+    setMinDisplayTime(newNum)
+    saveConfig('minDisplayTime', newNum)
+  }
+
+  const onChangeMaxDisplayTime = (e: any) => {
+    const newValue = e?.target?.value
+    const newNum = Number(newValue) || maxDisplayTime
+    setMaxDisplayTime(newNum)
+    saveConfig('maxDisplayTime', newNum)
   }
 
   const onChangePhraseSepTime = (e: any) => {
@@ -85,13 +116,13 @@ export function useFormInput() {
     saveConfig('phraseSepTime', newNum)
   }
 
-  const onChangeRecogLang = (lang: SingleValue<Option>, meta: ActionMeta<Option>) => {
+  const onChangeRecogLang = (lang: SingleValue<Option>) => {
     const newValue = lang?.value ?? recogLang
     setRecogLang(newValue)
     saveConfig('recogLang', newValue)
   }
 
-  const onChangeTransLang = (lang: SingleValue<Option>, meta: ActionMeta<Option>) => {
+  const onChangeTransLang = (lang: SingleValue<Option>) => {
     const newValue = lang?.value ?? transLang
     setTransLang(newValue)
     saveConfig('transLang', newValue)
@@ -274,6 +305,9 @@ export function useFormInput() {
       transHeight,
       useCustomRecogFont,
       useCustomTransFont,
+      averageReadSpeed,
+      minDisplayTime,
+      maxDisplayTime,
     },
     handler: {
       handleSwitch,
@@ -300,6 +334,9 @@ export function useFormInput() {
       onChangeTransFontWeight,
       onChangeTransHeight,
       onChangeTransLang,
+      onChangeAverageReadSpeed,
+      onChangeMinDisplayTime,
+      onChangeMaxDisplayTime,
       onToggleCustomRecogFont,
       onToggleCustomTransFont,
       onToggleHideConfig,

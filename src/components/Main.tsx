@@ -38,6 +38,9 @@ export function Main() {
     transHeight,
     useCustomRecogFont,
     useCustomTransFont,
+    averageReadSpeed,
+    minDisplayTime,
+    maxDisplayTime,
   } = value
 
   const {
@@ -65,6 +68,9 @@ export function Main() {
     onChangeTransFontWeight,
     onChangeTransHeight,
     onChangeTransLang,
+    onChangeAverageReadSpeed,
+    onChangeMinDisplayTime,
+    onChangeMaxDisplayTime,
     onToggleCustomRecogFont,
     onToggleCustomTransFont,
     onToggleHideConfig,
@@ -96,6 +102,9 @@ export function Main() {
         onToggleHideConfig={onToggleHideConfig}
         recogHeight={recogHeight}
         transHeight={transHeight}
+        averageReadSpeed={averageReadSpeed}
+        minDisplayTime={minDisplayTime}
+        maxDisplayTime={maxDisplayTime}
         handleSwitch={handleSwitch}
       />
       {!hideConfig && (
@@ -135,6 +144,36 @@ export function Main() {
                 onChange={onChangePhraseSepTime}
                 defaultValue={phraseSepTime}
               />
+            </div>
+            <div className="flex justify-start gap-16">
+              <div>
+                <Label htmlFor="averageReadSpeed">Average Read Speed (word/minute)</Label>
+
+                <Input
+                  name="averageReadSpeed"
+                  id="averageReadSpeed"
+                  onChange={onChangeAverageReadSpeed}
+                  defaultValue={averageReadSpeed}
+                />
+              </div>
+              <div>
+                <Label htmlFor="minDisplayTime">Minimal display time per phrase (ms)</Label>
+                <Input
+                  name="minDisplayTime"
+                  id="minDisplayTime"
+                  onChange={onChangeMinDisplayTime}
+                  defaultValue={minDisplayTime}
+                />
+              </div>
+              <div>
+                <Label htmlFor="maxDisplayTime">Maximal display time per phrase (ms)</Label>
+                <Input
+                  name="maxDisplayTime"
+                  id="maxDisplayTime"
+                  onChange={onChangeMaxDisplayTime}
+                  defaultValue={maxDisplayTime}
+                />
+              </div>
             </div>
           </div>
 

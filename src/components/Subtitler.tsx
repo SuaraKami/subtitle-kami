@@ -36,6 +36,9 @@ export interface SubtitlerProps {
   onToggleHideConfig?: () => void
   recogHeight?: number
   transHeight?: number
+  averageReadSpeed?: number
+  minDisplayTime?: number
+  maxDisplayTime?: number
   handleSwitch: () => {
     recogLang: LanguageKeys
     transLang: LanguageKeys
@@ -66,6 +69,9 @@ export function Subtitler({
   onToggleHideConfig,
   recogHeight,
   transHeight,
+  averageReadSpeed = 200,
+  minDisplayTime = 2000,
+  maxDisplayTime = 5000,
   handleSwitch,
 }: Readonly<SubtitlerProps>) {
   const [enabled, setEnabled] = useState(false)
@@ -131,13 +137,13 @@ export function Subtitler({
 
   const handleNext = useCallback(() => {
     if (showHistory) return
-    setTranslateFrom(Math.min(translateFrom + 1, translations.length - 1))
-  }, [translateFrom, translations.length, showHistory])
+    setTranslateFrom((prev) => Math.min(prev + 1, translations.length - 1))
+  }, [translations.length, showHistory])
 
   const handlePrev = useCallback(() => {
     if (showHistory) return
-    setTranslateFrom(Math.max(translateFrom - 1, 0))
-  }, [translateFrom, showHistory])
+    setTranslateFrom((prev) => Math.max(prev - 1, 0))
+  }, [showHistory])
 
   const fullScreenHandler = useFullScreenHandle()
   const handleFullScreen = useCallback(() => {
