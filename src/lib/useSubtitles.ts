@@ -34,6 +34,11 @@ export function useSubtitles(props: Props = {}) {
     interimResults = true,
     apiKey,
     phraseSepTime = 10, // ms
+    // Should be <2000 char per translation query.
+    // A generous max rate of speech roughly 600 wpm * 5 char/word ~ 50 char/s.
+    // This yields max delay of 2000 / 50 = 40s.
+    // More realistic max rate of speech is 300 wpm i.e. 80s.
+    // I.e. max delay in practice can be whatever the user wants.
     minPhraseLength = 20,
     maxPhraseLength = 1000, // <2000
     maxDelay = 500, // ms, must be less than about a minute
