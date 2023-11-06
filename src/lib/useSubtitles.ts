@@ -35,23 +35,15 @@ export function useSubtitles(props: Props = {}) {
     apiKey,
     phraseSepTime = 10, // ms
     minPhraseLength = 20,
-    // Should be <2000 char per translation query.
-    // A generous max rate of speech roughly 600 wpm * 5 char/word ~ 50 char/s.
-    // This yields max delay of 2000 / 50 = 40s.
-    // More realistic max rate of speech is 300 wpm i.e. 80s.
-    // I.e. max delay in practice can be whatever the user wants.
     maxPhraseLength = 1000, // <2000
-    maxDelay = 500, // ms, must be less than about a minute, see above
+    maxDelay = 500, // ms, must be less than about a minute
     usePost = false,
     showHistory = false,
   } = props
 
   const transUrl = 'https://script.google.com/macros/s/' + apiKey + '/exec'
 
-  // Note: transcript = final + ' ' + interim
   const {
-    transcript,
-    //interimTranscript,
     finalTranscript,
     listening,
     resetTranscript,
@@ -59,39 +51,10 @@ export function useSubtitles(props: Props = {}) {
     isMicrophoneAvailable,
   } = useSpeechRecognition()
 
-  useEffect(() => {
-    const maxDelayTimer = setTimeout(() => {
-      if (finalTranscript) {
-        requestTranslationQuery()
-      }
-    }, maxDelay)
-    let phraseTimer: NodeJS.Timeout
-    if (finalTranscript) {
-      if (finalTranscript.length > maxPhraseLength) {
-        requestTranslationQuery()
-      } else {
-        phraseTimer = setTimeout(() => {
-          if (finalTranscript.length > minPhraseLength) {
-            requestTranslationQuery()
-          }
-        }, phraseSepTime)
-      }
-    }
-    return () => {
-      if (maxDelayTimer) {
-        clearTimeout(maxDelayTimer)
-      }
-      if (phraseTimer) {
-        clearTimeout(phraseTimer)
-      }
-    }
-  }, [finalTranscript, maxDelay, maxPhraseLength, minPhraseLength, phraseSepTime]) // User settings changes split transcript, could rework this
-
-  // Can be called multiple times at once, but uses a mutex to prevent function logic from concurrent execution
   const mutex = new Mutex()
-  const requestTranslationQuery = async () => {
+
+  const requestTranslationQuery = async (phraseSepTime: number) => {
     try {
-      // Immediately fails if lock isn't available
       await tryAcquire(mutex).runExclusive(async () => {
         const text = finalTranscript?.trim()
         setTranscriptLog((prev) => {
@@ -100,7 +63,7 @@ export function useSubtitles(props: Props = {}) {
         })
         resetTranscript()
         if (apiKey) {
-          await doQuery(text, usePost)
+          await doQuery(text, usePost, phraseSepTime)
         }
       })
     } catch (e) {
@@ -110,24 +73,28 @@ export function useSubtitles(props: Props = {}) {
     }
   }
 
-  const reset = async () => {
-    resetTranscript()
-    setTranslation('')
-    setTranscriptLog('')
-    setTranslationLog('')
+  const handleTranscriptChange = () => {
+    if (finalTranscript) {
+      const dynamicPhraseSepTime = Math.max(
+        minPhraseLength,
+        Math.min(maxPhraseLength, finalTranscript.length * (phraseSepTime / minPhraseLength))
+      )
+      requestTranslationQuery(dynamicPhraseSepTime)
+    }
   }
 
-  // Google Apps Script can throw CORS errors sometimes, even on GET
-  // ref: https://stackoverflow.com/a/68933465
+  useEffect(() => {
+    if (interimResults) {
+      handleTranscriptChange()
+    }
+  }, [finalTranscript, maxPhraseLength, minPhraseLength, phraseSepTime])
 
-  const doQuery = async (text: string, usePost = false) => {
+  const doQuery = async (text: string, usePost = false, dynamicPhraseSepTime: any) => {
     let query
     if (usePost) {
       query = `${transUrl}?source=${recogLang}&target=${transLang}`
-      // logger.log('query: POST ' + query + ', body: ' + text)
     } else {
       query = `${transUrl}?text=${text}&source=${recogLang}&target=${transLang}`
-      // logger.log('query: GET ' + query)
     }
     try {
       const requestConfig = {
@@ -135,14 +102,13 @@ export function useSubtitles(props: Props = {}) {
           'Content-Type': 'text/plain;charset=utf-8',
         },
       }
-      let resp: AxiosResponse
+      let resp
       if (usePost) {
         resp = await axios.post(query, text, requestConfig)
       } else {
         resp = await axios.get(query, requestConfig)
       }
       const trans = resp?.data ?? ''
-      // logger.log('resp: ' + trans)
       if (trans) {
         setTranslation(trans)
         setTranslationLog((prev) => {
@@ -159,7 +125,7 @@ export function useSubtitles(props: Props = {}) {
   if (showHistory) {
     returnedTranscript = transcriptLog
   } else if (interimResults) {
-    returnedTranscript = transcript
+    returnedTranscript = finalTranscript
   } else {
     returnedTranscript = finalTranscript
   }
@@ -170,7 +136,7 @@ export function useSubtitles(props: Props = {}) {
     transcript: returnedTranscript,
     translation1: returnedTranslation,
     listening,
-    reset,
+    reset: resetTranscript,
     browserSupportsSpeechRecognition,
     isMicrophoneAvailable,
   }
