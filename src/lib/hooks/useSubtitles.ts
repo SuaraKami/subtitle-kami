@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import axios, { AxiosResponse } from 'axios'
-import logger from './logger'
-import { appendToFixedSizeString } from './history'
+import logger from '../logger'
+import { appendToFixedSizeString } from '../history'
 import { E_ALREADY_LOCKED, Mutex, tryAcquire } from 'async-mutex'
 
 export default SpeechRecognition

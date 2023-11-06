@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import SpeechRecognition, { useSubtitles } from '../lib/useSubtitles'
+import SpeechRecognition, { useSubtitles } from '../lib/hooks/useSubtitles'
 import { Subtitle } from './Subtitle'
 import { IconToggle } from './IconToggle'
 import { MicIcon } from './icons/MicIcon'
