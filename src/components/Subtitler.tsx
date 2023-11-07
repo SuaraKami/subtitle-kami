@@ -98,23 +98,9 @@ export function Subtitler({
   const [translateTo, setTranslateTo] = useState(translations.length - 1)
 
   useEffect(() => {
-    const lastPhrases = translations[translations.length - 1].split(' ')
-    const readTime = lastPhrases.length * (60 / averageReadSpeed)
-    const displayTime = Math.min(Math.max(readTime, minDisplayTime / 1000), maxDisplayTime / 1000) // in seconds
-
-    const showSubtitleTimer = setTimeout(() => {
-      if (lastPhrases.length > 0) {
-        setTranslateFrom((prevTranslateFrom) => {
-          return Math.min(prevTranslateFrom + 1, translations.length - 1)
-        })
-      }
-    }, displayTime * 1000) // in milliseconds
-
+    setTranslateFrom(showHistory ? 0 : translations.length - 1)
     setTranslateTo(translations.length - 1)
-    return () => {
-      clearTimeout(showSubtitleTimer)
-    }
-  }, [averageReadSpeed, minDisplayTime, maxDisplayTime, translations, showHistory])
+  }, [translations.length, showHistory])
 
   const dynamicTranslate = translations.slice(translateFrom, translateTo + 1).join('\n')
 
