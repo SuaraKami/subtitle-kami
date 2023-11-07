@@ -102,6 +102,10 @@ export function Subtitler({
     setTranslateTo(translations.length - 1)
   }, [translations.length, showHistory])
 
+  const dynamicTranscript = transcript
+    .split('\n')
+    .slice(translateFrom, translateTo + 1)
+    .join('\n')
   const dynamicTranslate = translations.slice(translateFrom, translateTo + 1).join('\n')
 
   const handleStart = useCallback(() => {
@@ -235,7 +239,7 @@ export function Subtitler({
         )}
         <Subtitle
           fontFamily={recogFont}
-          value={transcript}
+          value={dynamicTranscript}
           inputId="recogSubtitles"
           bgColor={bgColor}
           fontColor={recogFontColor}
