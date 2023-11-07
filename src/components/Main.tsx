@@ -44,7 +44,7 @@ export function Main() {
   } = value
 
   const {
-    handleSwitch,
+    switchLanguage,
     onChangeApiKey,
     onChangeBgColor,
     onChangeCustomRecogFont,
@@ -105,7 +105,7 @@ export function Main() {
         averageReadSpeed={averageReadSpeed}
         minDisplayTime={minDisplayTime}
         maxDisplayTime={maxDisplayTime}
-        handleSwitch={handleSwitch}
+        switchLanguage={switchLanguage}
       />
       {!hideConfig && (
         <div className="p-8 border border-gray-200">
@@ -145,31 +145,46 @@ export function Main() {
                 defaultValue={phraseSepTime}
               />
             </div>
-            <div className="flex justify-start gap-16">
-              <div>
-                <Label htmlFor="averageReadSpeed">Average Read Speed (word/minute)</Label>
+            <div className="flex justify-between gap-16">
+              <div className="flex-grow">
+                <Label htmlFor="averageReadSpeed" value={averageReadSpeed + 'word/minute'}>
+                  Average Read Speed
+                </Label>
 
-                <Input
+                <Range
                   name="averageReadSpeed"
                   id="averageReadSpeed"
+                  min={100}
+                  max={300}
+                  step={10}
                   onChange={onChangeAverageReadSpeed}
                   defaultValue={averageReadSpeed}
                 />
               </div>
-              <div>
-                <Label htmlFor="minDisplayTime">Minimal display time per phrase (ms)</Label>
-                <Input
+              <div className="flex-grow">
+                <Label htmlFor="minDisplayTime" value={minDisplayTime + 'ms'}>
+                  Minimal display time per phrase
+                </Label>
+                <Range
                   name="minDisplayTime"
                   id="minDisplayTime"
+                  min={1000}
+                  max={5000}
+                  step={500}
                   onChange={onChangeMinDisplayTime}
                   defaultValue={minDisplayTime}
                 />
               </div>
-              <div>
-                <Label htmlFor="maxDisplayTime">Maximal display time per phrase (ms)</Label>
-                <Input
+              <div className="flex-grow">
+                <Label htmlFor="maxDisplayTime" value={maxDisplayTime + 'ms'}>
+                  Maximal display time per phrase
+                </Label>
+                <Range
                   name="maxDisplayTime"
                   id="maxDisplayTime"
+                  min={2000}
+                  max={9000}
+                  step={500}
                   onChange={onChangeMaxDisplayTime}
                   defaultValue={maxDisplayTime}
                 />

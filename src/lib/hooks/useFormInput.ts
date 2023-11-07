@@ -262,7 +262,7 @@ export function useFormInput() {
     saveConfig('transHeight', newNum)
   }
 
-  const handleSwitch = useCallback(() => {
+  const switchLanguage = useCallback(() => {
     const newRecogLang = transLang
     setRecogLang(newRecogLang)
     saveConfig('recogLang', newRecogLang)
@@ -310,7 +310,7 @@ export function useFormInput() {
       maxDisplayTime,
     },
     handler: {
-      handleSwitch,
+      switchLanguage,
       onChangeApiKey,
       onChangeBgColor,
       onChangeCustomRecogFont,

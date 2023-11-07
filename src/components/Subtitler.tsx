@@ -39,7 +39,7 @@ export interface SubtitlerProps {
   averageReadSpeed?: number
   minDisplayTime?: number
   maxDisplayTime?: number
-  handleSwitch: () => {
+  switchLanguage: () => {
     recogLang: LanguageKeys
     transLang: LanguageKeys
   }
@@ -72,7 +72,7 @@ export function Subtitler({
   averageReadSpeed = 200,
   minDisplayTime = 2000,
   maxDisplayTime = 5000,
-  handleSwitch,
+  switchLanguage,
 }: Readonly<SubtitlerProps>) {
   const [enabled, setEnabled] = useState(false)
 
@@ -98,9 +98,23 @@ export function Subtitler({
   const [translateTo, setTranslateTo] = useState(translations.length - 1)
 
   useEffect(() => {
-    setTranslateFrom(showHistory ? 0 : translations.length - 1)
+    const lastPhrases = translations[translations.length - 1].split(' ')
+    const readTime = lastPhrases.length * (60 / averageReadSpeed)
+    const displayTime = Math.min(Math.max(readTime, minDisplayTime / 1000), maxDisplayTime / 1000) // in seconds
+
+    const showSubtitleTimer = setTimeout(() => {
+      if (lastPhrases.length > 0) {
+        setTranslateFrom((prevTranslateFrom) => {
+          return Math.min(prevTranslateFrom + 1, translations.length - 1)
+        })
+      }
+    }, displayTime * 1000) // in milliseconds
+
     setTranslateTo(translations.length - 1)
-  }, [translations.length, showHistory])
+    return () => {
+      clearTimeout(showSubtitleTimer)
+    }
+  }, [averageReadSpeed, minDisplayTime, maxDisplayTime, translations, showHistory])
 
   const dynamicTranslate = translations.slice(translateFrom, translateTo + 1).join('\n')
 
@@ -154,6 +168,11 @@ export function Subtitler({
     }
   }, [fullScreenHandler])
 
+  const handleSwitch = useCallback(() => {
+    const { recogLang } = switchLanguage()
+    handleRestart(recogLang)
+  }, [handleRestart, switchLanguage])
+
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Enter' || event.code === 'Enter') {
@@ -167,15 +186,13 @@ export function Subtitler({
       } else if (event.key === 'f' || event.code === 'KeyF') {
         handleFullScreen()
       } else if (event.key === 's' || event.code === 'KeyS') {
-        const { recogLang } = handleSwitch()
-        handleRestart(recogLang)
+        handleSwitch()
       }
     },
     [
       enabled,
       handleStart,
       handleStop,
-      handleRestart,
       handleNext,
       handlePrev,
       handleReset,
@@ -316,8 +333,8 @@ export function Subtitler({
 
             <ShortcutTooltip shortcut="S">
               <button
+                onClick={handleSwitch}
                 className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
-                disabled
               >
                 <SwitchIcon />
               </button>
