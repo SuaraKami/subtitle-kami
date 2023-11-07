@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
 import axios, { AxiosResponse } from 'axios'
 import logger from '../logger'
@@ -59,6 +59,70 @@ export function useSubtitles(props: Props = {}) {
     isMicrophoneAvailable,
   } = useSpeechRecognition()
 
+  // Google Apps Script can throw CORS errors sometimes, even on GET
+  // ref: https://stackoverflow.com/a/68933465
+
+  const doQuery = useCallback(
+    async (text: string, usePost = false) => {
+      let query
+      if (usePost) {
+        query = `${transUrl}?source=${recogLang}&target=${transLang}`
+        // logger.log('query: POST ' + query + ', body: ' + text)
+      } else {
+        query = `${transUrl}?text=${text}&source=${recogLang}&target=${transLang}`
+        // logger.log('query: GET ' + query)
+      }
+      try {
+        const requestConfig = {
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+        }
+        let resp: AxiosResponse
+        if (usePost) {
+          resp = await axios.post(query, text, requestConfig)
+        } else {
+          resp = await axios.get(query, requestConfig)
+        }
+        const trans = resp?.data ?? ''
+        // logger.log('resp: ' + trans)
+        if (trans) {
+          setTranslation(trans)
+          setTranslationLog((prev) => {
+            const separator = prev.length > 0 ? '\n' : ''
+            return appendToFixedSizeString(prev, separator + trans, maxLogSize)
+          })
+        }
+      } catch (e) {
+        logger.error(e)
+      }
+    },
+    [recogLang, transLang, transUrl, maxLogSize]
+  )
+
+  // Can be called multiple times at once, but uses a mutex to prevent function logic from concurrent execution
+  const mutex = useMemo(() => new Mutex(), [])
+  const requestTranslationQuery = useCallback(async () => {
+    try {
+      // Immediately fails if lock isn't available
+      await tryAcquire(mutex).runExclusive(async () => {
+        const text = finalTranscript?.trim()
+        setTranscriptLog((prev) => {
+          const separator = prev.length > 0 ? '\n' : ''
+          return appendToFixedSizeString(prev, separator + text, maxLogSize)
+        })
+        resetTranscript()
+        if (apiKey) {
+          await doQuery(text, usePost)
+        }
+      })
+    } catch (e) {
+      if (e !== E_ALREADY_LOCKED) {
+        logger.error('Error querying translation: ' + e)
+      }
+    }
+  }, [apiKey, finalTranscript, maxLogSize, resetTranscript, usePost, doQuery, mutex])
+
   useEffect(() => {
     const maxDelayTimer = setTimeout(() => {
       if (finalTranscript) {
@@ -85,74 +149,20 @@ export function useSubtitles(props: Props = {}) {
         clearTimeout(phraseTimer)
       }
     }
-  }, [finalTranscript, maxDelay, maxPhraseLength, minPhraseLength, phraseSepTime]) // User settings changes split transcript, could rework this
-
-  // Can be called multiple times at once, but uses a mutex to prevent function logic from concurrent execution
-  const mutex = new Mutex()
-  const requestTranslationQuery = async () => {
-    try {
-      // Immediately fails if lock isn't available
-      await tryAcquire(mutex).runExclusive(async () => {
-        const text = finalTranscript?.trim()
-        setTranscriptLog((prev) => {
-          const separator = prev.length > 0 ? '\n' : ''
-          return appendToFixedSizeString(prev, separator + text, maxLogSize)
-        })
-        resetTranscript()
-        if (apiKey) {
-          await doQuery(text, usePost)
-        }
-      })
-    } catch (e) {
-      if (e !== E_ALREADY_LOCKED) {
-        logger.error('Error querying translation: ' + e)
-      }
-    }
-  }
+  }, [
+    finalTranscript,
+    maxDelay,
+    maxPhraseLength,
+    minPhraseLength,
+    phraseSepTime,
+    requestTranslationQuery,
+  ]) // User settings changes split transcript, could rework this
 
   const reset = async () => {
     resetTranscript()
     setTranslation('')
     setTranscriptLog('')
     setTranslationLog('')
-  }
-
-  // Google Apps Script can throw CORS errors sometimes, even on GET
-  // ref: https://stackoverflow.com/a/68933465
-
-  const doQuery = async (text: string, usePost = false) => {
-    let query
-    if (usePost) {
-      query = `${transUrl}?source=${recogLang}&target=${transLang}`
-      // logger.log('query: POST ' + query + ', body: ' + text)
-    } else {
-      query = `${transUrl}?text=${text}&source=${recogLang}&target=${transLang}`
-      // logger.log('query: GET ' + query)
-    }
-    try {
-      const requestConfig = {
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-      }
-      let resp: AxiosResponse
-      if (usePost) {
-        resp = await axios.post(query, text, requestConfig)
-      } else {
-        resp = await axios.get(query, requestConfig)
-      }
-      const trans = resp?.data ?? ''
-      // logger.log('resp: ' + trans)
-      if (trans) {
-        setTranslation(trans)
-        setTranslationLog((prev) => {
-          const separator = prev.length > 0 ? '\n' : ''
-          return appendToFixedSizeString(prev, separator + trans, maxLogSize)
-        })
-      }
-    } catch (e) {
-      logger.error(e)
-    }
   }
 
   let returnedTranscript
