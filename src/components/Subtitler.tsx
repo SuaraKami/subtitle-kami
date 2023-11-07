@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import SpeechRecognition, { useSubtitles } from '../lib/useSubtitles'
+import SpeechRecognition, { useSubtitles } from '../lib/hooks/useSubtitles'
 import { Subtitle } from './Subtitle'
 import { IconToggle } from './IconToggle'
 import { MicIcon } from './icons/MicIcon'
@@ -36,7 +36,10 @@ export interface SubtitlerProps {
   onToggleHideConfig?: () => void
   recogHeight?: number
   transHeight?: number
-  handleSwitch: () => {
+  averageReadSpeed?: number
+  minDisplayTime?: number
+  maxDisplayTime?: number
+  switchLanguage: () => {
     recogLang: LanguageKeys
     transLang: LanguageKeys
   }
@@ -66,7 +69,10 @@ export function Subtitler({
   onToggleHideConfig,
   recogHeight,
   transHeight,
-  handleSwitch,
+  averageReadSpeed = 200,
+  minDisplayTime = 2000,
+  maxDisplayTime = 5000,
+  switchLanguage,
 }: Readonly<SubtitlerProps>) {
   const [enabled, setEnabled] = useState(false)
 
@@ -96,6 +102,10 @@ export function Subtitler({
     setTranslateTo(translations.length - 1)
   }, [translations.length, showHistory])
 
+  const dynamicTranscript = transcript
+    .split('\n')
+    .slice(translateFrom, translateTo + 1)
+    .join('\n')
   const dynamicTranslate = translations.slice(translateFrom, translateTo + 1).join('\n')
 
   const handleStart = useCallback(() => {
@@ -131,13 +141,13 @@ export function Subtitler({
 
   const handleNext = useCallback(() => {
     if (showHistory) return
-    setTranslateFrom(Math.min(translateFrom + 1, translations.length - 1))
-  }, [translateFrom, translations.length, showHistory])
+    setTranslateFrom((prev) => Math.min(prev + 1, translations.length - 1))
+  }, [translations.length, showHistory])
 
   const handlePrev = useCallback(() => {
     if (showHistory) return
-    setTranslateFrom(Math.max(translateFrom - 1, 0))
-  }, [translateFrom, showHistory])
+    setTranslateFrom((prev) => Math.max(prev - 1, 0))
+  }, [showHistory])
 
   const fullScreenHandler = useFullScreenHandle()
   const handleFullScreen = useCallback(() => {
@@ -147,6 +157,11 @@ export function Subtitler({
       fullScreenHandler.enter()
     }
   }, [fullScreenHandler])
+
+  const handleSwitch = useCallback(() => {
+    const { recogLang } = switchLanguage()
+    handleRestart(recogLang)
+  }, [handleRestart, switchLanguage])
 
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
@@ -161,15 +176,13 @@ export function Subtitler({
       } else if (event.key === 'f' || event.code === 'KeyF') {
         handleFullScreen()
       } else if (event.key === 's' || event.code === 'KeyS') {
-        const { recogLang } = handleSwitch()
-        handleRestart(recogLang)
+        handleSwitch()
       }
     },
     [
       enabled,
       handleStart,
       handleStop,
-      handleRestart,
       handleNext,
       handlePrev,
       handleReset,
@@ -226,7 +239,7 @@ export function Subtitler({
         )}
         <Subtitle
           fontFamily={recogFont}
-          value={transcript}
+          value={dynamicTranscript}
           inputId="recogSubtitles"
           bgColor={bgColor}
           fontColor={recogFontColor}
@@ -310,8 +323,8 @@ export function Subtitler({
 
             <ShortcutTooltip shortcut="S">
               <button
+                onClick={handleSwitch}
                 className="py-2 px-4 bg-white border border-gray-200 text-gray-600 rounded hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50"
-                disabled
               >
                 <SwitchIcon />
               </button>

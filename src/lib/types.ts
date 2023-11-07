@@ -6,3 +6,9 @@ export type LanguageLabels = {
     native: string
   }
 }
+
+export type Option = {
+  value: LanguageKeys
+  label: string
+}
+export type { ActionMeta, SingleValue } from 'react-select'

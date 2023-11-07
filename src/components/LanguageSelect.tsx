@@ -1,5 +1,5 @@
 import ReactSelect, { ActionMeta, SingleValue } from 'react-select'
-import type { LanguageLabels, LanguageKeys } from '../lib/types'
+import type { LanguageLabels, LanguageKeys, Option } from '../lib/types'
 
 export type LanguageType = 'transcribe' | 'translate'
 
@@ -33,12 +33,6 @@ export const translateLanguages: LanguageLabels = {
 
 // For simplicity, for now set languages to be the same subset for transcription/translation
 const transcribeLanguages = translateLanguages
-
-export type Option = {
-  value: LanguageKeys
-  label: string
-}
-export type { ActionMeta, SingleValue } from 'react-select'
 
 // Extending react-select
 // ref: https://stackoverflow.com/questions/66348283/
