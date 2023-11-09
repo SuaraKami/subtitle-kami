@@ -94,19 +94,31 @@ export function Subtitler({
 
   const translations = translation1.split('\n')
 
-  const [translateFrom, setTranslateFrom] = useState(showHistory ? 0 : translations.length - 1)
-  const [translateTo, setTranslateTo] = useState(translations.length - 1)
+  const [selectedCaption, setSelectedCaption] = useState<number>(0)
 
   useEffect(() => {
-    setTranslateFrom(showHistory ? 0 : translations.length - 1)
-    setTranslateTo(translations.length - 1)
-  }, [translations.length, showHistory])
+    let ignore = false
+    let subtitleTimer: NodeJS.Timeout
 
-  const dynamicTranscript = transcript
-    .split('\n')
-    .slice(translateFrom, translateTo + 1)
-    .join('\n')
-  const dynamicTranslate = translations.slice(translateFrom, translateTo + 1).join('\n')
+    if (selectedCaption < translations.length) {
+      const wordAmountsInSelected = translations[selectedCaption].split(' ').length
+      const readTime = wordAmountsInSelected * (60 / averageReadSpeed)
+      const displayTime = Math.min(Math.max(readTime, minDisplayTime / 1000), maxDisplayTime / 1000) // in seconds
+
+      subtitleTimer = setTimeout(() => {
+        if (!ignore) {
+          setSelectedCaption(Math.min(selectedCaption + 1, translations.length - 1))
+        }
+      }, displayTime * 1000)
+    }
+
+    return () => {
+      ignore = true
+      clearTimeout(subtitleTimer)
+    }
+  }, [selectedCaption, translations, averageReadSpeed, minDisplayTime, maxDisplayTime])
+
+  const dynamicTranslate = translations[selectedCaption]
 
   const handleStart = useCallback(() => {
     setEnabled(true)
@@ -123,6 +135,7 @@ export function Subtitler({
 
   const handleReset = useCallback(() => {
     reset()
+    setSelectedCaption(0)
   }, [reset])
 
   const handleRestart = useCallback(
@@ -140,14 +153,14 @@ export function Subtitler({
   )
 
   const handleNext = useCallback(() => {
-    if (showHistory) return
-    setTranslateFrom((prev) => Math.min(prev + 1, translations.length - 1))
-  }, [translations.length, showHistory])
+    // if (showHistory) return
+    // setTranslateFrom((prev) => Math.min(prev + 1, translations.length - 1))
+  }, [])
 
   const handlePrev = useCallback(() => {
-    if (showHistory) return
-    setTranslateFrom((prev) => Math.max(prev - 1, 0))
-  }, [showHistory])
+    // if (showHistory) return
+    // setTranslateFrom((prev) => Math.max(prev - 1, 0))
+  }, [])
 
   const fullScreenHandler = useFullScreenHandle()
   const handleFullScreen = useCallback(() => {
@@ -239,7 +252,7 @@ export function Subtitler({
         )}
         <Subtitle
           fontFamily={recogFont}
-          value={dynamicTranscript}
+          value={transcript}
           inputId="recogSubtitles"
           bgColor={bgColor}
           fontColor={recogFontColor}
