@@ -338,7 +338,7 @@ export function Main() {
                 name="recogHeight"
                 id="recogHeight"
                 min={0}
-                max={36}
+                max={72}
                 step={1}
                 defaultValue={recogHeight}
                 onChange={onChangeRecogHeight}
@@ -352,7 +352,7 @@ export function Main() {
                 name="transHeight"
                 id="transHeight"
                 min={0}
-                max={36}
+                max={72}
                 step={1}
                 defaultValue={transHeight}
                 onChange={onChangeTransHeight}
